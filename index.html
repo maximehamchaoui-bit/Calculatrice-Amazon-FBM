@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculatrice Rentabilité — Amazon FBM</title>
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FBM Calc">
+
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e5e7eb; margin:0; }
+    header { padding: 20px; border-bottom: 1px solid #1f2937; background: linear-gradient(180deg,#0b1223,#0f172a);}
+    h1 { margin: 0; font-size: 1.6rem; }
+    main { max-width: 900px; margin: 20px auto; padding: 10px; display: grid; gap: 20px; }
+    section { background:#0b1020; border:1px solid #1f2937; border-radius:10px; padding:16px; }
+    .row { display:grid; grid-template-columns:1fr 160px; gap:10px; margin-bottom:8px; }
+    label { font-size:0.9rem; }
+    input { padding:8px; border-radius:6px; border:1px solid #334155; background:#0a0f1e; color:#e5e7eb; }
+    button { margin-top:10px; margin-right:6px; padding:8px 14px; border-radius:6px; border:none; cursor:pointer; }
+    button.primary { background:#2563eb; color:white; }
+    button.secondary { background:#0b132a; border:1px solid #334155; color:#e5e7eb; }
+    .results { display:grid; gap:6px; }
+    .kpi { display:flex; justify-content:space-between; padding:6px; border:1px dashed #334155; border-radius:6px; background:#0a1022; }
+    .kpi span:last-child { font-weight:600; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Calculatrice de rentabilité — Amazon FBM</h1>
+  </header>
+
+  <main>
+    <section>
+      <h2>Entrées</h2>
+      <div class="row"><label>Prix de vente TTC (€)</label><input id="price" type="text" value="24,35"></div>
+      <div class="row"><label>Coût d’achat (€)</label><input id="cogs" type="text" value="8,00"></div>
+      <div class="row"><label>Emballage (€)</label><input id="pack" type="text" value="0,40"></div>
+      <div class="row"><label>Expédition (€)</label><input id="ship" type="text" value="4,50"></div>
+      <div class="row"><label>Commission Amazon (%)</label><input id="amazonRate" type="text" value="15"></div>
+      <div class="row"><label>Frais fixes Amazon (€)</label><input id="amazonFixed" type="text" value="0"></div>
+      <div class="row"><label>URSSAF (% CA)</label><input id="urssafRate" type="text" value="12,4"></div>
+      <div class="row"><label>Autres coûts (€)</label><input id="other" type="text" value="0"></div>
+      <button class="primary" id="btnCalc">Calculer</button>
+      <button class="secondary" id="btnPreset">Preset : Brume 90 ml</button>
+      <button class="secondary" id="btnReset">RAZ</button>
+    </section>
+
+    <section>
+      <h2>Résultats</h2>
+      <div class="results">
+        <div class="kpi"><span>Commission Amazon</span><span id="v_amzFee">—</span></div>
+        <div class="kpi"><span>Coût total</span><span id="v_totalCost">—</span></div>
+        <div class="kpi"><span>Marge brute</span><span id="v_gross">—</span></div>
+        <div class="kpi"><span>URSSAF</span><span id="v_urssaf">—</span></div>
+        <div class="kpi"><span>Marge nette</span><span id="v_net">—</span></div>
+        <div class="kpi"><span>Marge nette (%)</span><span id="v_netPct">—</span></div>
+        <div class="kpi"><span>ROI (%)</span><span id="v_roi">—</span></div>
+        <div class="kpi"><span>Prix plancher</span><span id="v_breakeven">—</span></div>
+        <div class="kpi"><span>Recommandation</span><span id="v_callout">—</span></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const fmt = (n) => (isFinite(n)? n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+" €":"—");
+    const fmtPct=(n)=>(isFinite(n)? n.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+" %":"—");
+    const val=(id)=>{let s=document.getElementById(id).value.replace(',','.');return parseFloat(s)||0;}
+    const set=(id,txt)=>document.getElementById(id).textContent=txt;
+    function breakeven(price,amazonRate,amazonFixed,urssafRate,baseCosts){const d=1-amazonRate-urssafRate;return d>0?(baseCosts+amazonFixed)/d:Infinity;}
+    function recalc(){
+      const price=val('price'),cogs=val('cogs'),pack=val('pack'),ship=val('ship'),
+      amazonRate=val('amazonRate')/100,amazonFixed=val('amazonFixed'),
+      urssafRate=val('urssafRate')/100,other=val('other');
+      const amzFee=price*amazonRate+amazonFixed,totalCost=cogs+pack+ship+amzFee+other,
+      gross=price-totalCost,urssaf=price*urssafRate,net=gross-urssaf,
+      netPct=price?(net/price)*100:NaN,roi=cogs?(net/cogs)*100:NaN,
+      baseCosts=cogs+pack+ship+other,p0=breakeven(price,amazonRate,amazonFixed,urssafRate,baseCosts);
+      set('v_amzFee',fmt(amzFee));set('v_totalCost',fmt(totalCost));set('v_gross',fmt(gross));
+      set('v_urssaf',fmt(urssaf));set('v_net',fmt(net));set('v_netPct',fmtPct(netPct));
+      set('v_roi',fmtPct(roi));set('v_breakeven',fmt(p0));
+      let callout="—";if(isFinite(net)){if(netPct>=25&&roi>=50)callout="✅ Très bon";
+      else if(netPct>=15&&roi>=30)callout="🟨 Correct";else if(net>0)callout="⚠️ Faible";else callout="⛔ Pas rentable";}
+      set('v_callout',callout);}
+    function presetPerfume(){document.getElementById('price').value='24,35';document.getElementById('cogs').value='8,00';
+      document.getElementById('pack').value='0,40';document.getElementById('ship').value='4,50';
+      document.getElementById('amazonRate').value='15';document.getElementById('amazonFixed').value='0';
+      document.getElementById('urssafRate').value='12,4';document.getElementById('other').value='0';recalc();}
+    function resetAll(){['price','cogs','pack','ship','amazonRate','amazonFixed','urssafRate','other']
+      .forEach(id=>document.getElementById(id).value='0');recalc();}
+    document.addEventListener('DOMContentLoaded',()=>{if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js');}
+      document.getElementById('btnCalc').addEventListener('click',recalc);
+      document.getElementById('btnPreset').addEventListener('click',presetPerfume);
+      document.getElementById('btnReset').addEventListener('click',resetAll);
+      ['price','cogs','pack','ship','amazonRate','amazonFixed','urssafRate','other'].forEach(id=>{
+        document.getElementById(id).addEventListener('input',recalc);});recalc();});
+  </script>
+</body>
+</html>
