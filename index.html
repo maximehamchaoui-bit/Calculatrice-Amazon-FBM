@@ -3,100 +3,456 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calculatrice Rentabilité — Amazon FBM</title>
+  <title>Calculatrice Rentabilité — Amazon FBM/FBA</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.webmanifest?v=2">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="FBM Calc">
+  <meta name="apple-mobile-web-app-title" content="FBM/FBA Calc">
 
   <style>
-    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e5e7eb; margin:0; }
-    header { padding: 20px; border-bottom: 1px solid #1f2937; background: linear-gradient(180deg,#0b1223,#0f172a);}
-    h1 { margin: 0; font-size: 1.6rem; }
-    main { max-width: 900px; margin: 20px auto; padding: 10px; display: grid; gap: 20px; }
-    section { background:#0b1020; border:1px solid #1f2937; border-radius:10px; padding:16px; }
-    .row { display:grid; grid-template-columns:1fr 160px; gap:10px; margin-bottom:8px; }
-    label { font-size:0.9rem; }
-    input { padding:8px; border-radius:6px; border:1px solid #334155; background:#0a0f1e; color:#e5e7eb; }
-    button { margin-top:10px; margin-right:6px; padding:8px 14px; border-radius:6px; border:none; cursor:pointer; }
-    button.primary { background:#2563eb; color:white; }
-    button.secondary { background:#0b132a; border:1px solid #334155; color:#e5e7eb; }
-    .results { display:grid; gap:6px; }
-    .kpi { display:flex; justify-content:space-between; padding:6px; border:1px dashed #334155; border-radius:6px; background:#0a1022; }
-    .kpi span:last-child { font-weight:600; }
+    :root { --gap: 12px; --radius: 10px; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial;
+      margin: 0; background: #0f172a; color: #e5e7eb; line-height: 1.45; }
+    header { padding: 20px clamp(16px, 3.6vw, 36px); border-bottom: 1px solid #1f2937; background: linear-gradient(180deg, #0b1223, #0f172a); }
+    h1 { margin: 0 0 4px 0; font-size: clamp(18px, 3.8vw, 26px); font-weight: 700; letter-spacing: .2px; }
+    p.subtle { margin: 4px 0 0; color: #9ca3af; font-size: 0.95rem; }
+    main { padding: 24px clamp(16px, 3.6vw, 36px) 56px; display: grid; gap: 20px; max-width: 1100px; margin: 0 auto; }
+    section { background: #0b1020; border: 1px solid #1f2937; border-radius: 10px; padding: clamp(14px, 2.4vw, 18px); }
+    h2 { margin: 0 0 8px 0; font-size: 1.1rem; letter-spacing: .2px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .row { display: grid; grid-template-columns: 1fr 200px; gap: 10px; align-items: center; }
+    .row > label { color: #cbd5e1; font-size: 0.95rem; }
+    input, select {
+      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155;
+      background: #0a0f1e; color: #e5e7eb; outline: none;
+    }
+    input:focus, select:focus { border-color: #64748b; }
+    .stack { display: grid; gap: 10px; }
+    .btns { display:flex; gap:10px; flex-wrap: wrap; margin-top: 6px; }
+    button { background: #2563eb; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    button.secondary { background: #0b132a; border: 1px solid #334155; color: #e5e7eb; }
+    .muted { color: #94a3b8; font-size: .9rem; }
+    .kpi { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 8px 10px; border: 1px dashed #334155; border-radius: 8px; background: #0a1022; }
+    .kpi .label { color: #9ca3af; } .kpi .value { font-weight: 700; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #1f2937; text-align: right; font-size: .95rem; }
+    th { text-align: left; color:#cbd5e1; }
+    td:first-child, th:first-child { text-align: left; }
+    .tag { display:inline-block; padding: 4px 8px; border:1px solid #374151; background:#111827; border-radius:999px; color:#cbd5e1; font-size:.8rem; }
+    .row.hint small{ color:#94a3b8; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <header>
-    <h1>Calculatrice de rentabilité — Amazon FBM <span style="font-size:0.8rem;color:#94a3b8;">v2</span></h1>
+    <h1>Calculatrice de rentabilité — Amazon <span class="tag">FBM/FBA</span> <span style="color:#9ca3af;font-size:.9rem;">AE (sans TVA)</span></h1>
+    <p class="subtle">URSSAF 12,5 % (modifiable). Frais Amazon auto selon catégorie + plan. FBM ou FBA avec préremplissage (modifiable).</p>
   </header>
 
-  <main>
+  <main class="grid-2">
+    <!-- Panneau entrées -->
     <section>
-      <h2>Entrées</h2>
-      <div class="row"><label>Prix de vente TTC (€)</label><input id="price" type="text" value="24,35"></div>
-      <div class="row"><label>Coût d’achat (€)</label><input id="cogs" type="text" value="8,00"></div>
-      <div class="row"><label>Emballage (€)</label><input id="pack" type="text" value="0,40"></div>
-      <div class="row"><label>Expédition (€)</label><input id="ship" type="text" value="4,50"></div>
-      <div class="row"><label>Commission Amazon (%)</label><input id="amazonRate" type="text" value="15"></div>
-      <div class="row"><label>Frais fixes Amazon (€)</label><input id="amazonFixed" type="text" value="0"></div>
-      <div class="row"><label>URSSAF (% CA)</label><input id="urssafRate" type="text" value="12,4"></div>
-      <div class="row"><label>Autres coûts (€)</label><input id="other" type="text" value="0"></div>
-      <button class="primary" id="btnCalc">Calculer</button>
-      <button class="secondary" id="btnPreset">Preset : Brume 90 ml</button>
-      <button class="secondary" id="btnReset">RAZ</button>
+      <h2>Entrées (produit courant)</h2>
+      <div class="stack">
+        <div class="row"><label>Nom du produit</label><input id="p_name" placeholder="ex. Brume 90 ml"></div>
+
+        <div class="row"><label>Mode d’exécution</label>
+          <select id="mode">
+            <option value="FBM" selected>FBM — Expédition par moi</option>
+            <option value="FBA">FBA — Fulfillment by Amazon</option>
+          </select>
+        </div>
+
+        <div class="row"><label>Plan de vente Amazon</label>
+          <select id="amzPlan">
+            <option value="individual" selected>Individuel — 0,99 € / vente</option>
+            <option value="pro">Professionnel — 0 € / vente (abonnement mensuel)</option>
+          </select>
+        </div>
+
+        <div class="row"><label>Catégorie Amazon (commission)</label>
+          <select id="amzCategory">
+            <!-- rempli depuis la base JSON -->
+          </select>
+        </div>
+
+        <div class="row"><label>Commission Amazon %</label><input id="amazonRate" inputmode="decimal" value="0"></div>
+        <div class="row"><label>Frais fixes Amazon €</label><input id="amazonFixed" inputmode="decimal" value="0"></div>
+
+        <div class="row"><label>Prix de vente (TTC, Amazon) €</label><input id="price" inputmode="decimal" value="0"></div>
+        <div class="row"><label>Coût d’achat €</label><input id="cogs" inputmode="decimal" value="0"></div>
+        <div class="row"><label>Emballage & consommables €</label><input id="pack" inputmode="decimal" value="0"></div>
+
+        <!-- FBM block -->
+        <div id="fbmBlock">
+          <div class="row"><label>Profil transporteur (FBM)</label>
+            <select id="shipProfile">
+              <option value="">— Choisir (optionnel)</option>
+              <option value="4.50" selected>Par défaut (léger / relais) ~ 4,50 €</option>
+              <option value="4.40">Mondial Relay (≤500 g) ~ 4,40 €</option>
+              <option value="6.99">Colissimo Relais ~ 6,99 €</option>
+              <option value="8.10">Colissimo Domicile ~ 8,10 €</option>
+              <option value="4.25">Shop2Shop (Chrono Relais) ~ 4,25 €</option>
+            </select>
+          </div>
+          <div class="row"><label>Frais d’expédition client (FBM) €</label><input id="ship" inputmode="decimal" value="4,50"></div>
+        </div>
+
+        <!-- FBA block -->
+        <div id="fbaBlock" class="hidden">
+          <div class="row"><label>Palier frais FBA</label>
+            <select id="fbaTier">
+              <!-- rempli depuis la base JSON -->
+            </select>
+          </div>
+          <div class="row"><label>Frais traitement FBA €/u</label><input id="fbaFee" inputmode="decimal" value="0"></div>
+          <div class="row"><label>Expédition vers Amazon €/u</label><input id="fbaInbound" inputmode="decimal" value="0"></div>
+          <div class="row"><label>Stockage €/u (optionnel)</label><input id="fbaStorage" inputmode="decimal" value="0"></div>
+        </div>
+
+        <div class="row"><label>URSSAF % (base CA TTC)</label><input id="urssafRate" inputmode="decimal" value="12,5"></div>
+        <div class="row"><label>Autres coûts / unité €</label><input id="other" inputmode="decimal" value="0"></div>
+
+        <div class="btns">
+          <button id="btnCalc">Calculer</button>
+          <button class="secondary" id="btnPreset">Preset : Brume 90 ml</button>
+          <button class="secondary" id="btnReset">RAZ</button>
+          <button class="secondary" id="btnAddRow">Ajouter au comparateur</button>
+        </div>
+
+        <p class="muted">
+          Hypothèses AE : pas de TVA collectée/déductible. L’URSSAF est calculé sur le **CA TTC** (prix de vente).  
+          Les frais Amazon se composent de la **commission (%)** + **frais fixes par vente** (0,99 € si plan Individuel, 0 € sinon) + **(FBA éventuels)**.
+        </p>
+      </div>
     </section>
 
+    <!-- Panneau résultats -->
     <section>
       <h2>Résultats</h2>
-      <div class="results">
-        <div class="kpi"><span>Commission Amazon</span><span id="v_amzFee">—</span></div>
-        <div class="kpi"><span>Coût total</span><span id="v_totalCost">—</span></div>
-        <div class="kpi"><span>Marge brute</span><span id="v_gross">—</span></div>
-        <div class="kpi"><span>URSSAF</span><span id="v_urssaf">—</span></div>
-        <div class="kpi"><span>Marge nette</span><span id="v_net">—</span></div>
-        <div class="kpi"><span>Marge nette (%)</span><span id="v_netPct">—</span></div>
-        <div class="kpi"><span>ROI (%)</span><span id="v_roi">—</span></div>
-        <div class="kpi"><span>Prix plancher</span><span id="v_breakeven">—</span></div>
-        <div class="kpi"><span>Recommandation</span><span id="v_callout">—</span></div>
+      <div class="stack">
+        <div class="kpi"><span class="label">Commission Amazon</span><span class="value" id="v_amzFee">—</span></div>
+        <div class="kpi"><span class="label">Coûts totaux</span><span class="value" id="v_totalCost">—</span></div>
+        <div class="kpi"><span class="label">Marge brute</span><span class="value" id="v_gross">—</span></div>
+        <div class="kpi"><span class="label">URSSAF</span><span class="value" id="v_urssaf">—</span></div>
+        <div class="kpi"><span class="label">Marge nette</span><span class="value" id="v_net">—</span></div>
+        <div class="kpi"><span class="label">Marge nette (% du prix)</span><span class="value" id="v_netPct">—</span></div>
+        <div class="kpi"><span class="label">ROI sur coût achat</span><span class="value" id="v_roi">—</span></div>
+        <div class="kpi"><span class="label">Prix plancher (point mort)</span><span class="value" id="v_breakeven">—</span></div>
+        <div class="kpi"><span class="label">Recommandation</span><span class="value" id="v_callout">—</span></div>
+      </div>
+    </section>
+
+    <!-- Comparateur -->
+    <section style="grid-column: 1 / -1;">
+      <h2>Comparateur multi-produits</h2>
+      <div class="btns" style="margin-bottom:8px;">
+        <button class="secondary" id="btnExport">Exporter en CSV</button>
+        <span class="muted">Ajoute des lignes depuis le panneau de gauche (“Ajouter au comparateur”).</span>
+      </div>
+      <div style="overflow:auto;">
+        <table id="compTable">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Mode</th>
+              <th>Prix TTC</th>
+              <th>Coût achat</th>
+              <th>Emballage</th>
+              <th>Expédition/Inbound</th>
+              <th>Traitement FBA</th>
+              <th>Comm. Amazon</th>
+              <th>URSSAF</th>
+              <th>Coût total</th>
+              <th>Marge nette (€)</th>
+              <th>Net (%)</th>
+              <th>ROI (%)</th>
+              <th>Prix plancher</th>
+              <th>Reco</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </section>
   </main>
 
+  <!-- Base JSON intégrée (catégories & paliers FBA) -->
+  <script type="application/json" id="fee-db">
+  {
+    "categories": [
+      {"label": "Beauté / Hygiène / Parfum", "rate": 15},
+      {"label": "Maison / Cuisine", "rate": 15},
+      {"label": "Sports / Loisirs", "rate": 15},
+      {"label": "Électronique (moy.)", "rate": 12},
+      {"label": "Informatique (certains articles)", "rate": 8},
+      {"label": "Autres (par défaut)", "rate": 15}
+    ],
+    "fba_tiers": [
+      {"label": "Petit standard ≤150g", "fee": 2.80},
+      {"label": "Standard 150–400g", "fee": 3.10},
+      {"label": "Standard 400–950g", "fee": 3.80},
+      {"label": "Grand standard 0.95–1.9kg", "fee": 5.10},
+      {"label": "Surdimensionné léger", "fee": 6.50}
+    ]
+  }
+  </script>
+
   <script>
-    const fmt = (n) => (isFinite(n)? n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+" €":"—");
-    const fmtPct=(n)=>(isFinite(n)? n.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+" %":"—");
-    const val=(id)=>{let s=document.getElementById(id).value.replace(',','.');return parseFloat(s)||0;}
-    const set=(id,txt)=>document.getElementById(id).textContent=txt;
-    function breakeven(price,amazonRate,amazonFixed,urssafRate,baseCosts){const d=1-amazonRate-urssafRate;return d>0?(baseCosts+amazonFixed)/d:Infinity;}
+    // --- Utils
+    const parseN = (v) => { v = (v??'').toString().replace(',', '.'); const n = parseFloat(v); return isFinite(n)? n : 0; };
+    const fmtE = (n) => isFinite(n) ? n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €' : '—';
+    const fmtP = (n) => isFinite(n) ? n.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+' %' : '—';
+    const setTxt = (id, val) => document.getElementById(id).textContent = val;
+    const show = (el, yes) => el.classList[yes ? 'remove' : 'add']('hidden');
+
+    // --- Charger la "base" JSON intégrée
+    const DB = JSON.parse(document.getElementById('fee-db').textContent);
+    const catSelect = document.getElementById('amzCategory');
+    const tierSelect = document.getElementById('fbaTier');
+
+    // Peupler catégories & paliers
+    (function populateFromDB(){
+      catSelect.innerHTML = '<option value="">— Sélectionne une catégorie</option>' +
+        DB.categories.map(c => `<option value="${c.rate}">${c.label} — ${c.rate} %</option>`).join('');
+      tierSelect.innerHTML = '<option value="">— Sélectionne un palier</option>' +
+        DB.fba_tiers.map(t => `<option value="${t.fee}">${t.label} — ${t.fee.toFixed(2)} €</option>`).join('');
+    })();
+
+    // --- Sélecteurs reliés
+    document.getElementById('amzCategory').addEventListener('change', e=>{
+      const pct = e.target.value || '0';
+      document.getElementById('amazonRate').value = pct.replace('.', ',');
+      recalc();
+    });
+
+    document.getElementById('fbaTier').addEventListener('change', e=>{
+      const fee = e.target.value || '0';
+      document.getElementById('fbaFee').value = String(fee).replace('.', ',');
+      recalc();
+    });
+
+    const planEl = document.getElementById('amzPlan');
+    planEl.addEventListener('change', () => {
+      if (planEl.value === 'individual') {
+        document.getElementById('amazonFixed').value = '0,99';
+      } else {
+        document.getElementById('amazonFixed').value = '0';
+      }
+      recalc();
+    });
+
+    // FBM/FBA toggle
+    const modeEl = document.getElementById('mode');
+    const fbmBlock = document.getElementById('fbmBlock');
+    const fbaBlock = document.getElementById('fbaBlock');
+    modeEl.addEventListener('change', ()=>{
+      const isFBA = modeEl.value === 'FBA';
+      show(fbmBlock, !isFBA ? true : false); // fbm visible si FBM
+      show(fbaBlock, isFBA ? true : false);  // fba visible si FBA
+      recalc();
+    });
+
+    // Profils transporteurs -> remplit "ship"
+    document.getElementById('shipProfile').addEventListener('change', e=>{
+      const v = e.target.value;
+      if (v) document.getElementById('ship').value = String(v).replace('.', ',');
+      recalc();
+    });
+
+    function readInputs(){
+      return {
+        name: document.getElementById('p_name').value.trim() || 'Produit',
+        mode: document.getElementById('mode').value,
+        price: parseN(document.getElementById('price').value),
+        cogs: parseN(document.getElementById('cogs').value),
+        pack: parseN(document.getElementById('pack').value),
+        ship: parseN(document.getElementById('ship').value),
+        amazonRatePct: parseN(document.getElementById('amazonRate').value),
+        amazonFixed: parseN(document.getElementById('amazonFixed').value),
+        urssafPct: parseN(document.getElementById('urssafRate').value),
+        other: parseN(document.getElementById('other').value),
+        fbaFee: parseN(document.getElementById('fbaFee').value),
+        fbaInbound: parseN(document.getElementById('fbaInbound').value),
+        fbaStorage: parseN(document.getElementById('fbaStorage').value)
+      };
+    }
+
+    // Calcul AE (sans TVA)
+    function computeAE(i){
+      const amzFee = i.price * (i.amazonRatePct/100) + i.amazonFixed;
+
+      let variableFulfillment = 0;
+      let logistics = 0;
+
+      if (i.mode === 'FBM') {
+        logistics = i.ship;              // expédition client
+        variableFulfillment = 0;         // pas de frais FBA
+      } else {
+        logistics = i.fbaInbound + i.fbaStorage; // logistique côté vendeur
+        variableFulfillment = i.fbaFee;          // traitement FBA
+      }
+
+      const totalCost = i.cogs + i.pack + logistics + variableFulfillment + amzFee + i.other;
+      const gross = i.price - totalCost;
+      const urssaf = i.price * (i.urssafPct/100);     // base CA TTC
+      const net = gross - urssaf;
+      const netPct = i.price ? (net/i.price)*100 : NaN;
+      const roi = i.cogs ? (net/i.cogs)*100 : NaN;
+
+      return { amzFee, totalCost, gross, urssaf, net, netPct, roi, logistics, variableFulfillment };
+    }
+
+    // Prix plancher (net ≈ 0) par dichotomie
+    function breakevenNumeric(baseInputs){
+      let lo = 0, hi = Math.max(1000, baseInputs.price || 100), target = 0;
+      for (let i=0;i<40;i++){
+        const mid = (lo+hi)/2;
+        const out = computeAE({ ...baseInputs, price: mid });
+        if (out.net > target) hi = mid; else lo = mid;
+      }
+      return (lo+hi)/2;
+    }
+
     function recalc(){
-      const price=val('price'),cogs=val('cogs'),pack=val('pack'),ship=val('ship'),
-      amazonRate=val('amazonRate')/100,amazonFixed=val('amazonFixed'),
-      urssafRate=val('urssafRate')/100,other=val('other');
-      const amzFee=price*amazonRate+amazonFixed,totalCost=cogs+pack+ship+amzFee+other,
-      gross=price-totalCost,urssaf=price*urssafRate,net=gross-urssaf,
-      netPct=price?(net/price)*100:NaN,roi=cogs?(net/cogs)*100:NaN,
-      baseCosts=cogs+pack+ship+other,p0=breakeven(price,amazonRate,amazonFixed,urssafRate,baseCosts);
-      set('v_amzFee',fmt(amzFee));set('v_totalCost',fmt(totalCost));set('v_gross',fmt(gross));
-      set('v_urssaf',fmt(urssaf));set('v_net',fmt(net));set('v_netPct',fmtPct(netPct));
-      set('v_roi',fmtPct(roi));set('v_breakeven',fmt(p0));
-      let callout="—";if(isFinite(net)){if(netPct>=25&&roi>=50)callout="✅ Très bon";
-      else if(netPct>=15&&roi>=30)callout="🟨 Correct";else if(net>0)callout="⚠️ Faible";else callout="⛔ Pas rentable";}
-      set('v_callout',callout);}
-    function presetPerfume(){document.getElementById('price').value='24,35';document.getElementById('cogs').value='8,00';
-      document.getElementById('pack').value='0,40';document.getElementById('ship').value='4,50';
-      document.getElementById('amazonRate').value='15';document.getElementById('amazonFixed').value='0';
-      document.getElementById('urssafRate').value='12,4';document.getElementById('other').value='0';recalc();}
-    function resetAll(){['price','cogs','pack','ship','amazonRate','amazonFixed','urssafRate','other']
-      .forEach(id=>document.getElementById(id).value='0');recalc();}
-    document.addEventListener('DOMContentLoaded',()=>{if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js?v=2');}
-      document.getElementById('btnCalc').addEventListener('click',recalc);
-      document.getElementById('btnPreset').addEventListener('click',presetPerfume);
-      document.getElementById('btnReset').addEventListener('click',resetAll);
-      ['price','cogs','pack','ship','amazonRate','amazonFixed','urssafRate','other'].forEach(id=>{
-        document.getElementById(id).addEventListener('input',recalc);});recalc();});
+      const i = readInputs();
+      const o = computeAE(i);
+      setTxt('v_amzFee', fmtE(o.amzFee));
+      setTxt('v_totalCost', fmtE(o.totalCost));
+      setTxt('v_gross', fmtE(o.gross));
+      setTxt('v_urssaf', fmtE(o.urssaf));
+      setTxt('v_net', fmtE(o.net));
+      setTxt('v_netPct', fmtP(o.netPct));
+      setTxt('v_roi', fmtP(o.roi));
+      const p0 = breakevenNumeric(i);
+      setTxt('v_breakeven', fmtE(p0));
+      let callout = '—';
+      if (isFinite(o.net)) {
+        if (o.netPct >= 25 && o.roi >= 50) callout = '✅ Très bon (go)';
+        else if (o.netPct >= 15 && o.roi >= 30) callout = '🟨 Correct, à tester';
+        else if (o.net > 0) callout = '⚠️ Faible rentabilité';
+        else callout = '⛔ Pas rentable';
+      }
+      setTxt('v_callout', callout);
+    }
+
+    // Comparateur
+    const tbody = document.querySelector('#compTable tbody');
+    function addCurrentToTable(){
+      const i = readInputs();
+      const o = computeAE(i);
+      const p0 = breakevenNumeric(i);
+
+      const tr = document.createElement('tr');
+      const cells = [
+        i.name,
+        i.mode,
+        fmtE(i.price),
+        fmtE(i.cogs),
+        fmtE(i.pack),
+        i.mode === 'FBM' ? fmtE(i.ship) : fmtE(i.fbaInbound),
+        i.mode === 'FBM' ? '—' : fmtE(i.fbaFee + i.fbaStorage),
+        fmtE(o.amzFee),
+        fmtE(o.urssaf),
+        fmtE(o.totalCost),
+        fmtE(o.net),
+        fmtP(o.netPct),
+        fmtP(o.roi),
+        fmtE(p0),
+        (o.netPct >=25 && o.roi >=50) ? '✅' : (o.netPct>=15 && o.roi>=30) ? '🟨' : (o.net>0) ? '⚠️' : '⛔'
+      ];
+      for (const c of cells){
+        const td = document.createElement('td'); td.textContent = c; tr.appendChild(td);
+      }
+      const tdAct = document.createElement('td');
+      const del = document.createElement('button');
+      del.textContent = 'Supprimer';
+      del.className = 'secondary';
+      del.onclick = () => tr.remove();
+      tdAct.appendChild(del); tr.appendChild(tdAct);
+      tbody.appendChild(tr);
+    }
+
+    function exportCSV(){
+      const rows = [];
+      const headers = Array.from(document.querySelectorAll('#compTable thead th')).map(th=>th.textContent.trim());
+      rows.push(headers.slice(0,-1)); // sans la colonne Action
+      tbody.querySelectorAll('tr').forEach(tr=>{
+        const tds = Array.from(tr.querySelectorAll('td')).slice(0,-1).map(td=>td.textContent.replace(/\s€|%/g,''));
+        rows.push(tds);
+      });
+      const csv = rows.map(r=>r.map(x=>`"${(x??'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'comparateur_fbm_fba.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    // Preset & Reset
+    function presetPerfume(){
+      document.getElementById('p_name').value = 'Brume parfumée 90 ml';
+      document.getElementById('mode').value = 'FBM';
+      document.getElementById('amzPlan').value = 'individual';
+      document.getElementById('amzCategory').value = ''; // te laisse choisir
+      document.getElementById('amazonRate').value = '15';
+      document.getElementById('amazonFixed').value = '0,99';
+      document.getElementById('price').value = '24,35';
+      document.getElementById('cogs').value = '8,00';
+      document.getElementById('pack').value = '0,40';
+      document.getElementById('shipProfile').value = '4.50';
+      document.getElementById('ship').value = '4,50';
+      document.getElementById('fbaTier').value = '';
+      document.getElementById('fbaFee').value = '0';
+      document.getElementById('fbaInbound').value = '0';
+      document.getElementById('fbaStorage').value = '0';
+      document.getElementById('urssafRate').value = '12,5';
+      document.getElementById('other').value = '0';
+      show(fbmBlock, true); show(fbaBlock, false);
+      recalc();
+    }
+    function resetAll(){
+      document.getElementById('p_name').value = '';
+      document.getElementById('mode').value = 'FBM';
+      document.getElementById('amzPlan').value = 'individual';
+      document.getElementById('amzCategory').value = '';
+      document.getElementById('amazonRate').value = '0';
+      document.getElementById('amazonFixed').value = '0,99';
+      document.getElementById('price').value = '0';
+      document.getElementById('cogs').value = '0';
+      document.getElementById('pack').value = '0';
+      document.getElementById('shipProfile').value = '4.50';
+      document.getElementById('ship').value = '4,50';   // seul prérempli au démarrage
+      document.getElementById('fbaTier').value = '';
+      document.getElementById('fbaFee').value = '0';
+      document.getElementById('fbaInbound').value = '0';
+      document.getElementById('fbaStorage').value = '0';
+      document.getElementById('urssafRate').value = '12,5';
+      document.getElementById('other').value = '0';
+      show(fbmBlock, true); show(fbaBlock, false);
+      recalc();
+    }
+
+    // Hooks
+    document.addEventListener('DOMContentLoaded', ()=>{
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js?v=2').catch(console.error);
+      }
+      document.getElementById('btnCalc').addEventListener('click', recalc);
+      document.getElementById('btnPreset').addEventListener('click', presetPerfume);
+      document.getElementById('btnReset').addEventListener('click', resetAll);
+      document.getElementById('btnAddRow').addEventListener('click', addCurrentToTable);
+      document.getElementById('btnExport').addEventListener('click', exportCSV);
+      ['p_name','mode','amzPlan','amzCategory','price','cogs','pack','ship','amazonRate','amazonFixed','urssafRate','other','fbaTier','fbaFee','fbaInbound','fbaStorage','shipProfile']
+        .forEach(id=>document.getElementById(id).addEventListener('input', recalc));
+      resetAll(); // initialise : seul ship=4,50 prérempli
+    });
   </script>
 </body>
 </html>
