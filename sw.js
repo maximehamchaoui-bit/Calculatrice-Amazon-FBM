@@ -1,11 +1,12 @@
 // Cache simple pour PWA — v2
-const CACHE = "fbm-calc-v4-" + Date.now();
+const CACHE = "fbm-calc-v5-" + Date.now();
 const ASSETS = [
   "./",
   "./index.html?v=2",
   "./manifest.webmanifest?v=2",
   "./icon-192.png",
   "./icon-512.png"
+  './style.css?v=2'
 ];
 
 self.addEventListener("install", (e) => {
