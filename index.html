@@ -607,6 +607,15 @@
       // init
       byId('mode').value='FBM'; byId('amzPlan').value='individual'; byId('amazonFixed').value='0,99'; byId('ship').value='4,50'; recalc();
     });
+    // Masquer le splash au chargement
+const hideSplash = () => {
+  document.getElementById('splash')?.classList.add('hidden');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  // ... ton code existant (init, SW, etc.)
+  setTimeout(hideSplash, 800); // garde l’écran 0,8s pour l’effet
+});
   </script>
 </body>
 </html>
