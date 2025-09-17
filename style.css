@@ -126,4 +126,59 @@
   .splash img{width:62%; filter: drop-shadow(0 6px 20px rgba(212,175,55,.35));}
   @keyframes pop{0%{transform:scale(.9);opacity:.2} 100%{transform:scale(1);opacity:1}}
   @media (prefers-reduced-motion: reduce){ .splash .card{animation:none} }
+/* === PATCH LISIBILITÉ (iPhone) === */
+
+/* Page 100% sombre + color-scheme pour iOS */
+:root { color-scheme: dark; }
+body { background: #0b0f1c !important; }
+
+.hero {
+  background: #0f1118 !important;                 /* plein, sans transparence */
+  border-bottom-color: #2a3146 !important;
+}
+section { background: #141822 !important; border-color: #23293a !important; }
+
+/* Titres/labels plus contrastés */
+h1, h2 { color: #f1f2f6 !important; }
+label { color: #e6e8ee !important; font-weight: 600; }
+
+/* Inputs : fond + texte + placeholder très lisibles */
+input, select {
+  background: #0b0f16 !important;
+  color: #f7f9ff !important;
+  border: 1px solid #323a52 !important;
+}
+input:focus, select:focus {
+  border-color: #d4af37 !important;
+  box-shadow: 0 0 0 3px rgba(212,175,55,.25) !important;
+}
+input::placeholder { color: #c7cfdd !important; opacity: 1; }
+select option { background: #0b0f16; color: #e6e8ee; }
+
+/* Onglets : actif bien lisible, inactif gris foncé */
+.tab { background:#0e121b !important; color:#d9dee8 !important; border-color:#23293a !important; }
+.tab.active {
+  background:#171c27 !important;
+  color:#d4af37 !important;
+  border-color: rgba(212,175,55,.28) !important;
+  box-shadow: 0 0 0 1px rgba(212,175,55,.22) inset !important;
+}
+
+/* KPIs : bordure dorée douce, texte clair */
+.kpi { border-color: rgba(212,175,55,.25) !important; background:#0d1320 !important; }
+.kpi .value { color:#f5f7fb !important; }
+
+/* Boutons : noir/doré, lisibles */
+button { background:#d4af37 !important; color:#0b0f12 !important; }
+button.secondary { background:#0b0f16 !important; color:#e6e8ee !important; border:1px solid rgba(212,175,55,.22) !important; }
+
+/* Bar d’actions bien séparée */
+.bar { background: rgba(13,17,25,.95) !important; border-top-color:#23293a !important; }
+
+/* Tableau : traits plus visibles */
+th, td { border-bottom-color:#1f2536 !important; }
+td:first-child, th:first-child { background:#141822 !important; }
+
+/* Splash : fond bien sombre */
+.splash { background:#0b0f1c !important; }
 </style>
