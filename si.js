@@ -1,5 +1,5 @@
 // Cache simple pour PWA — v2
-const CACHE = "fbm-calc-v2-" + Date.now();
+const CACHE = "fbm-calc-v4-" + Date.now();
 const ASSETS = [
   "./",
   "./index.html?v=2",
