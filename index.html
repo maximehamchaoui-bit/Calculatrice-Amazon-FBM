@@ -571,7 +571,7 @@
 
     // ===== Hooks
     document.addEventListener('DOMContentLoaded', ()=>{
-      if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js?v=4').catch(console.error); }
+      if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js?v=5').catch(console.error); }
       // i18n
       applyI18n(); byId('langToggle').addEventListener('click',()=>{ LANG = (LANG==='fr'?'en':'fr'); applyI18n(); });
       // actions
