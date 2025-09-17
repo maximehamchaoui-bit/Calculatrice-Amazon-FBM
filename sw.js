@@ -1,11 +1,11 @@
 // Cache simple pour PWA — v2
-const CACHE = "fbm-calc-v5-" + Date.now();
+const CACHE = "fbm-calc-v6-" + Date.now();
 const ASSETS = [
   "./",
   "./index.html?v=2",
   "./manifest.webmanifest?v=2",
-  "./icon-192.png",
-  "./icon-512.png"
+  "./icon-192.png?v=2",
+  "./icon-512.png?v=2"
   './style.css?v=2'
 ];
 
